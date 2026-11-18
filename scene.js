@@ -6,6 +6,15 @@ const mint = '#9ef4dc';
 const amber = '#ffcb7d';
 const ink = '#152129';
 const duration = 8;
+const controls = [...document.querySelectorAll('#settings input')];
+const settings = Object.fromEntries(controls.map(input => [
+  input.id, input.type === 'number' ? Number(input.value) : input.value
+]));
+controls.forEach(input => input.addEventListener('input', () => {
+  if (input.type === 'number' && (input.value === '' || !input.validity.valid)) return;
+  settings[input.id] = input.type === 'number' ? input.valueAsNumber : input.value;
+  draw();
+}));
 
 function rect(x, y, w, h, color) {
   ctx.fillStyle = color;
@@ -29,9 +38,9 @@ function line(points, color = mint, width = 3) {
 
 function render(t) {
   line([[114, 205], [606, 205]], '#40535a');
-  ['Komut', 'Tohum', 'Örnekle', 'Çıktı'].forEach((name, i) => {
+  [settings.first,settings.second,settings.third,settings.fourth].forEach((name, i) => {
     const x = 53 + i * 166;
-    rect(x, 178, 120, 54, t >= i * 2 ? '#26564f' : '#22313a');
+    rect(x, 178, 120, 54, t >= i * settings.delay ? '#26564f' : '#22313a');
     label(name, x + 12, 211, 19);
   });
 }
@@ -74,6 +83,13 @@ play.addEventListener('click', () => {
 seek.addEventListener('input', () => {
   position = Number(seek.value);
   draw();
+});
+
+document.querySelector('#save').addEventListener('click', () => {
+  const link = document.createElement('a');
+  link.download = 'visual-node-flow.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
 });
 
 draw();
